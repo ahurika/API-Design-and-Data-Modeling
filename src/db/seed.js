@@ -32,7 +32,7 @@ function randInt(min, max) {
  * @param {string[]} cols    column list
  * @param {Array<Array>} rows rows of values
  * @param {string} [conflict] optional ON CONFLICT clause
- * @returns {{text: string, params: Array}} pg query
+ * @returns {{text: string, values: Array}} pg query config
  */
 function bulkInsert(table, cols, rows, conflict) {
   const placeholders = [];
@@ -51,7 +51,7 @@ function bulkInsert(table, cols, rows, conflict) {
     `INSERT INTO ${table} (${cols.join(', ')}) VALUES ${placeholders.join(', ')}` +
     (conflict ? ` ${conflict}` : '') +
     ' RETURNING id';
-  return { text, params };
+  return { text, values: params };
 }
 
 const CURRENCIES = ['NGN', 'USD', 'GBP', 'EUR', 'KES'];
@@ -70,6 +70,21 @@ function randomTitle() {
   return `${pick(ADJECTIVES)} ${pick(NOUNS)}`;
 }
 
+// Staggered realistic timestamps: each row gets its own created/updated time
+// spread over the past year (REQ-REALISTIC-003). Prevents flat out-of-the-box
+// listing pages and exercises keyset pagination against non-uniform data.
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function pastDate(maxDaysAgo, minDaysAgo = 0) {
+  const days = randInt(minDaysAgo, maxDaysAgo);
+  const ms = Date.now() - days * DAY_MS - randInt(0, 23) * 60 * 60 * 1000 - randInt(0, 59) * 60 * 1000 - randInt(0, 59) * 1000;
+  return new Date(ms);
+}
+
+function iso(date) {
+  return date.toISOString();
+}
+
 // ─── seed ───────────────────────────────────────────────────────────────────
 
 async function seed() {
@@ -84,11 +99,16 @@ async function seed() {
     // ── 1. Sellers (200) ──────────────────────────────────────────────────
     console.log('Seeding sellers …');
     const sellerRows = [];
-    for (let i = 1; i <= 200; i++) sellerRows.push([`Seller ${i}`, `seller${i}@example.com`]);
+    const sellerCreated = [];
+    for (let i = 1; i <= 200; i++) {
+      const created = pastDate(730, 1);
+      sellerCreated.push(created);
+      sellerRows.push([`Seller ${i}`, `seller${i}@example.com`, iso(created), iso(created)]);
+    }
     const sellersRes = await client.query(
       bulkInsert(
         'sellers',
-        ['name', 'email'],
+        ['name', 'email', 'created_at', 'updated_at'],
         sellerRows,
         'ON CONFLICT (email) DO NOTHING',
       ),
@@ -99,11 +119,14 @@ async function seed() {
     // ── 2. Buyers (200) ───────────────────────────────────────────────────
     console.log('Seeding buyers …');
     const buyerRows = [];
-    for (let i = 1; i <= 200; i++) buyerRows.push([`Buyer ${i}`, `buyer${i}@example.com`]);
+    for (let i = 1; i <= 200; i++) {
+      const created = pastDate(730, 1);
+      buyerRows.push([`Buyer ${i}`, `buyer${i}@example.com`, iso(created), iso(created)]);
+    }
     const buyersRes = await client.query(
       bulkInsert(
         'buyers',
-        ['name', 'email'],
+        ['name', 'email', 'created_at', 'updated_at'],
         buyerRows,
         'ON CONFLICT (email) DO NOTHING',
       ),
@@ -122,10 +145,13 @@ async function seed() {
       ...Array(10).fill('ARCHIVED'),
     ];
     const listingRows = [];
+    const listingCreated = [];
     for (let i = 0; i < 300; i++) {
       const status      = pick(listingStatuses);
       const currency    = pick(CURRENCIES);
       const priceMinor  = randInt(100, 50000) * 100; // e.g. 10000 = 100 NGN
+      const created     = pastDate(365, 1);
+      listingCreated.push(created);
       listingRows.push([
         pick(sellerIds),
         randomTitle(),
@@ -133,12 +159,14 @@ async function seed() {
         priceMinor,
         currency,
         status,
+        iso(created),
+        iso(created),
       ]);
     }
     const listingsRes = await client.query(
       bulkInsert(
         'listings',
-        ['seller_id', 'title', 'description', 'price_minor', 'currency', 'status'],
+        ['seller_id', 'title', 'description', 'price_minor', 'currency', 'status', 'created_at', 'updated_at'],
         listingRows,
       ),
     );
@@ -161,7 +189,7 @@ async function seed() {
       ...Array(10).fill('CANCELLED'),
     ];
     const orderRows    = [];
-    const orderByIndex = []; // { listingId, buyerId, status } per order
+    const orderByIndex = []; // { listingId, buyerId, status, createdAt } per order
     for (let i = 0; i < 400; i++) {
       const activeListing = pick(activeRows);
       const buyerId       = pick(buyerIds);
@@ -169,6 +197,7 @@ async function seed() {
       const unitPrice     = activeListing.price_minor;
       const totalAmount   = quantity * unitPrice;
       const status        = pick(orderStatuses);
+      const createdAt     = pastDate(30, 1);
 
       orderRows.push([
         buyerId,
@@ -178,13 +207,15 @@ async function seed() {
         totalAmount,
         activeListing.currency,
         status,
+        iso(createdAt),
+        iso(createdAt),
       ]);
-      orderByIndex.push({ listingId: activeListing.id, buyerId, status });
+      orderByIndex.push({ listingId: activeListing.id, buyerId, status, createdAt });
     }
     const ordersRes = await client.query(
       bulkInsert(
         'orders',
-        ['buyer_id', 'listing_id', 'quantity', 'unit_price_minor', 'total_amount_minor', 'currency', 'status'],
+        ['buyer_id', 'listing_id', 'quantity', 'unit_price_minor', 'total_amount_minor', 'currency', 'status', 'created_at', 'updated_at'],
         orderRows,
       ),
     );
@@ -209,7 +240,9 @@ async function seed() {
       const rating     = randInt(1, 5);
       const comment =
         `${rating >= 4 ? 'Great' : rating === 3 ? 'Decent' : 'Disappointing'} purchase. Would ${rating >= 3 ? '' : 'not '}recommend.`;
-      reviewRows.push([buyerId, listingId, orderId, rating, comment]);
+      // review created after its order was completed
+      const reviewAt = new Date(orderByIndex[orderIndex].createdAt.getTime() + randInt(1, 20) * DAY_MS);
+      reviewRows.push([buyerId, listingId, orderId, rating, comment, iso(reviewAt), iso(reviewAt)]);
     }
     let reviewCount = 0;
     for (let i = 0; i < reviewRows.length; i += 100) {
@@ -217,7 +250,7 @@ async function seed() {
       const res = await client.query(
         bulkInsert(
           'reviews',
-          ['buyer_id', 'listing_id', 'order_id', 'rating', 'comment'],
+          ['buyer_id', 'listing_id', 'order_id', 'rating', 'comment', 'created_at', 'updated_at'],
           chunk,
           'ON CONFLICT (order_id) DO NOTHING',
         ),
@@ -244,5 +277,6 @@ async function seed() {
 
 seed().catch((err) => {
   console.error('Seed failed:', err.message);
+  if (err.code) console.error(`  (pg code ${err.code}, position ${err.position})`);
   process.exit(1);
 });
