@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace API — Consumer</title>
+  <style>
+    :root { --border: #dfe3e8; --muted: #6b7280; --accent: #2563eb; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px; font: 15px/1.5 system-ui, sans-serif;
+      background: #f8fafc; color: #111827;
+    }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .endpoint { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+    .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    select, button {
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
+      background: #fff; font-size: 14px; cursor: pointer;
+    }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li {
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 16px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    }
+    .title { font-weight: 600; }
+    .sub { color: var(--muted); font-size: 13px; }
+    .price { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .chip {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 2px 8px; border-radius: 999px; background: #eef2ff; color: #4338ca;
+    }
+    .state { padding: 16px; text-align: center; color: var(--muted); background: #fff;
+      border: 1px dashed var(--border); border-radius: 8px; }
+    .state.error { color: #b91c1c; }
+    .state.error, .state.empty { border-color: #fecaca; }
+    footer { margin-top: 16px; display: flex; justify-content: space-between;
+      align-items: center; color: var(--muted); font-size: 13px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Marketplace API — live listings</h1>
+    <p class="endpoint" id="endpoint">Loading…</p>
+
+    <div class="controls">
+      <select id="statusFilter" aria-label="Filter by status">
+        <option value="">All statuses</option>
+        <option value="ACTIVE">ACTIVE</option>
+        <option value="DRAFT">DRAFT</option>
+        <option value="SOLD_OUT">SOLD_OUT</option>
+        <option value="ARCHIVED">ARCHIVED</option>
+      </select>
+      <select id="limit" aria-label="Page size">
+        <option value="20">20 per page</option>
+        <option value="50">50 per page</option>
+        <option value="100">100 per page</option>
+      </select>
+      <button id="nextBtn" class="primary">Next page →</button>
+    </div>
+
+    <div id="list"></div>
+
+    <footer>
+      <span id="meta"></span>
+      <span><a id="publishUrl" href="#" target="_blank" rel="noopener">publish</a></span>
+    </footer>
+  </main>
+
+  <script>
+    'use strict';
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // The consumer must call the deployed PUBLIC URL, never localhost
+    // (REQ-CONSUMER-002). A build script can rewrite this constant; the repo also
+    // ships consumer/config.js with the same value.
+    // ─────────────────────────────────────────────────────────────────────────────
+    var API_BASE = 'PUBLIC_API_URL_HERE';
+
+    var listEl     = document.getElementById('list');
+    var metaEl     = document.getElementById('meta');
+    var statusEl   = document.getElementById('statusFilter');
+    var limitEl    = document.getElementById('limit');
+    var nextBtn    = document.getElementById('nextBtn');
+    var endpointEl = document.getElementById('endpoint');
+
+    var state = {
+      data: [],
+      meta: null,
+      cursor: null,
+      loading: false,
+      error: null,
+    };
+
+    function render() {
+      endpointEl.textContent = 'GET ' + API_BASE.replace(/\/$/, '') + '/api/v1/listings';
+
+      if (state.loading) {
+        listEl.innerHTML = '<div class="state">Loading listings…</div>';
+        nextBtn.disabled = true;
+        return;
+      }
+
+      if (state.error) {
+        listEl.innerHTML =
+          '<div class="state error"><strong>Could not reach the API.</strong><br>' +
+          escapeHtml(state.error) + '</div>';
+        nextBtn.disabled = true;
+        metaEl.textContent = '';
+        return;
+      }
+
+      if (!state.data || state.data.length === 0) {
+        listEl.innerHTML = '<div class="state empty">No listings match this filter.</div>';
+        nextBtn.disabled = true;
+        metaEl.textContent = state.meta ? '0 of ' + state.meta.total : '';
+        return;
+      }
+
+      var lis = state.data.map(function (l) {
+        var price = (l.priceMinor / 100).toLocaleString(undefined, {
+          minimumFractionDigits: 2, maximumFractionDigits: 2,
+        });
+        return (
+          '<li>' +
+            '<div><span class="title">' + escapeHtml(l.title) + '</span>' +
+            '<div class="sub">' + escapeHtml(l.id) + '</div></div>' +
+            '<div style="text-align:right"><div class="price">' +
+              price + ' ' + escapeHtml(l.currency) + '</div>' +
+            '<span class="chip">' + escapeHtml(l.status) + '</span></div>' +
+          '</li>'
+        );
+      });
+
+      listEl.innerHTML = '<ul>' + lis.join('') + '</ul>';
+
+      if (state.meta) {
+        metaEl.textContent = state.data.length + ' of ' + state.meta.total + ' listings';
+      }
+      nextBtn.disabled = !state.meta || !state.meta.hasMore;
+    }
+
+    function buildUrl(cursor) {
+      var params = [];
+
+      if (state.filters && state.filters.status) params.push('status=' + encodeURIComponent(state.filters.status));
+      params.push('limit=' + encodeURIComponent(state.filters.limit));
+      params.push('sort=created_at');
+      params.push('order=desc');
+      if (cursor) params.push('cursor=' + encodeURIComponent(cursor));
+
+      return API_BASE.replace(/\/$/, '') + '/api/v1/listings?' + params.join('&');
+    }
+
+    function load(cursor) {
+      state.loading = true;
+      state.error = null;
+      render();
+
+      fetch(buildUrl(cursor))
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().then(function (body) {
+              var msg = body && body.error && body.error.message
+                ? body.error.message
+                : ('HTTP ' + res.status);
+              throw new Error('Request failed (' + res.status + '): ' + msg);
+            });
+          }
+          return res.json();
+        })
+        .then(function (json) {
+          state.data = json.data;
+          state.meta = json.meta;
+          state.cursor = json.meta && json.meta.hasMore ? json.meta.nextCursor : null;
+          state.loading = false;
+          render();
+        })
+        .catch(function (err) {
+          state.loading = false;
+          state.error = err.message;
+          render();
+        });
+    }
+
+    function refresh() {
+      state.filters = {
+        status: statusEl.value,
+        limit: limitEl.value,
+      };
+      load(null);
+    }
+
+    statusEl.addEventListener('change', refresh);
+    limitEl.addEventListener('change', refresh);
+    nextBtn.addEventListener('click', function () { load(state.cursor); });
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // If the placeholder wasn't replaced, show a clear empty/error state rather than
+    // silently calling an invalid URL.
+    if (API_BASE === 'PUBLIC_API_URL_HERE' || /localhost|127\.0\.0\.1/.test(API_BASE)) {
+      state.error = 'PUBLIC_API_URL must be set to the deployed URL (localhost is not allowed for the consumer).';
+      render();
+    } else {
+      document.getElementById('publishUrl').textContent = API_BASE;
+      document.getElementById('publishUrl').href = API_BASE;
+      refresh();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Reference Render Blueprint for the Marketplace API
+# Deploys the Express API with a managed PostgreSQL-backed schema.
+# After the first deploy, run the seed once:
+#   render run npm run seed
+services:
+  - type: web
+    name: marketplace-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run migrate && npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: RATE_LIMIT_WINDOW_SECONDS
+        value: 60
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+# DATABASE_URL is provided at runtime from a managed PostgreSQL provider
+# (e.g. Neon). Production seed runs `npm run seed` against that connection.
