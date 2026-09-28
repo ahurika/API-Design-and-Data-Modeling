@@ -448,9 +448,9 @@ Deploy steps (Render + Neon):
 1. Create a managed PostgreSQL project (e.g. Neon) and copy the connection string.
 2. Deploy this repo to Render (`render.yaml` blueprints the service):
    - Build command: `npm install`
-   - Start command: `npm run migrate && npm start`
+   - Start command: `npm run migrate && npm run seed && npm start`
    - Health check path: `/` (returns the API index JSON)
 3. Set environment variables `DATABASE_URL`, `PORT`, `NODE_ENV=production`, `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_MAX_REQUESTS`. `DATABASE_URL` must be the Neon connection string.
-4. Run the production seed once against the deployed `DATABASE_URL` (`render run npm run seed`) — do not put `seed` in the start command (REQ-DEPLOY-003).
+4. The start command runs the production migration and the repeatable seed at boot (REQ-DEPLOY-003, REQ-SEED-001) — the seed truncates and rebuilds to a known non-duplicated state, so a free-tier restart always has data. If you prefer to seed once manually, drop `seed` from the start command and run `render run npm run seed`.
 5. Copy the service URL from the Render dashboard (e.g. `https://<service-name>.onrender.com`); that is the public API URL to place in the consumer and README.
 6. Test from outside your machine via the public URL (REQ-DEPLOY-005) and with the consumer.

@@ -1,14 +1,14 @@
 # Reference Render Blueprint for the Marketplace API
 # Deploys the Express API with a managed PostgreSQL-backed schema.
-# After the first deploy, run the seed once:
-#   render run npm run seed
+# migrate + seed run idempotently at boot (see REQ-DEPLOY-003); the seed
+# truncates and rebuilds to a known state, so restarting is always safe.
 services:
   - type: web
     name: marketplace-api
     runtime: node
     plan: free
     buildCommand: npm install
-    startCommand: npm run migrate && npm start
+    startCommand: npm run migrate && npm run seed && npm start
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
