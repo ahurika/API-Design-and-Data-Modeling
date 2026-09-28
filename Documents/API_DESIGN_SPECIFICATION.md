@@ -312,9 +312,9 @@ No endpoint returns HTTP `200` carrying an error body (REQ-ERROR-005).
 
 ## State
 
-Listing lifecycle must match the approved data model. Do not introduce a state such as `SOLD_OUT` unless the model has a quantity/stock concept that makes it enforceable.
+Listing lifecycle must match the approved data model (REQ-LISTING-003): `DRAFT → ACTIVE → SOLD_OUT|ARCHIVED`, `SOLD_OUT → ARCHIVED`, enforced at the application layer with `422` for every other transition. `SOLD_OUT` is a seller-marked state meaning the listing is no longer available for ordering; it is not derived from a stock/quantity field because the model intentionally has no stock concept per REQ-LISTING-003 and the Task 3 scope.
 
-Orders must have an explicit lifecycle and forbidden transitions.
+Orders must have an explicit lifecycle and forbidden transitions (REQ-ORDER-002).
 
 Reviews may only be created when their order/buyer/listing relationship satisfies the approved completed-order invariant.
 

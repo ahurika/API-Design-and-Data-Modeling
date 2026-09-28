@@ -369,7 +369,7 @@ ARCHIVED
 | ---------- | ---------------------------------------------------------------------------- |
 | `DRAFT`    | Listing exists but is not available for purchase                             |
 | `ACTIVE`   | Listing is available                                                         |
-| `SOLD_OUT` | Listing is no longer available because available quantity has been exhausted |
+| `SOLD_OUT` | Seller-marked as no longer available for ordering (no stock concept in the model; set via transition, REQ-LISTING-003) |
 | `ARCHIVED` | Listing has been removed from active marketplace availability                |
 
 ### Allowed Transitions

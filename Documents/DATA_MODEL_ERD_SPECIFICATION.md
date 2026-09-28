@@ -3,6 +3,8 @@
 ## Purpose
 This is the approved physical data model for the Marketplace API. It defines every entity, column, type, identifier and cardinality, and is the single source of truth the schema in `src/db/schema.sql` implements. Any change to this document and the schema must stay in lock-step (check ``ERD matches schema`` in the checklist).
 
+**Source of truth.** This specification is subordinate to `PRD.md` and the Task 3 brief. Where anything in this document conflicts with the PRD or the brief, the PRD/task requirements take precedence and this document must be corrected. Every requirement ID cited here is defined in the PRD; no IDs are invented in this document.
+
 ## Resources
 Five entities: **Buyer**, **Seller**, **Listing**, **Order**, **Review**.
 
@@ -131,9 +133,9 @@ A review is only valid when its order is `COMPLETED` (REQ-REVIEW-002). This is e
 | Field | Type | Nullable | Default | Notes |
 |---|---|---|---|---|
 | `id` | TEXT (UUID v4) | No | `gen_random_uuid()` | Generated identifier (REQ-ID-001) |
-| `buyer_id` | TEXT (UUID v4) | No | — | FK → buyers.id (REQ-CHECK-004) |
-| `listing_id` | TEXT (UUID v4) | No | — | FK → listings.id (REQ-CHECK-004) |
-| `order_id` | TEXT (UUID v4) | No | — | FK → orders.id (REQ-CHECK-004) |
+| `buyer_id` | TEXT (UUID v4) | No | — | FK → buyers.id (REQ-CONSTRAINT-004) |
+| `listing_id` | TEXT (UUID v4) | No | — | FK → listings.id (REQ-CONSTRAINT-004) |
+| `order_id` | TEXT (UUID v4) | No | — | FK → orders.id (REQ-CONSTRAINT-004) |
 | `rating` | SMALLINT | No | — | CHECK 1–5 |
 | `comment` | TEXT | No | — | |
 | `created_at` | TIMESTAMPTZ | No | `NOW()` | (REQ-TIME-001) |

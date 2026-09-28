@@ -431,12 +431,12 @@ Secrets live in the deployment environment, never in the repository (REQ-DEPLOY-
 2. **Generated identifiers** (REQ-ID-001): UUIDs via `gen_random_uuid()`. Sequential integers make a dataset trivially enumerable, so IDs are generated and non-sequential.
 3. **Cursor pagination** (REQ-API-003): an opaque `nextCursor` (base64 JSON of the last row's `{id, sortValue}`) keeps pagination stable as the collection changes. Offset pagination remains simpler for direct page jumps and static collections, but cursor is chosen here for traversal correctness at the few-hundred-record scale.
 4. **Exact timestamps in cursors**: timestamps are parsed at full stored precision (microseconds, RFC 3339) rather than rounded to milliseconds, so a cursor's sort value always matches the stored value and the secondary `id` tie-break fires correctly. Without this, rows sharing the same millisecond would silently fall through between pages.
-4. **Envelopes** (REQ-API-007/008): one success shape (`data`/`meta` for lists, `data` for items) and one error shape (`error.code` + `error.message`) keep client parsing predictable and errors honest (REQ-ERROR-005).
-5. **Money** (REQ-MONEY-001/002): integers in minor units (e.g. `45000` = 450.00) alongside an explicit ISO 4217 code. No floating point anywhere.
-6. **Deliberate denormalisation** (REQ-NORMAL-002): orders snapshot `unitPriceMinor` (price at purchase time) and store `totalAmountMinor` (quantity × unit price) so historical transaction value never depends on a listing's current or future price. The listing remains the authoritative source for *current* pricing; the order is authoritative for its *historical* snapshot.
-7. **Rate limiting in configuration** (REQ-RATE-002): the limits live in environment variables read by one middleware, not in route handlers, so operational tuning does not touch code.
-8. **Versioning** (REQ-API-001): `/api/v1` exists from the first release so future breaking changes ship as `/api/v2` without breaking existing consumers.
-9. **Realistic seed timestamps**: each row gets its own staggered `createdAt`/`updatedAt` spread over the past year instead of a shared `NOW()`, so pagination, sorting and the consumer's list views exercise non-uniform data (REQ-REALISTIC-003).
+5. **Envelopes** (REQ-API-007/008): one success shape (`data`/`meta` for lists, `data` for items) and one error shape (`error.code` + `error.message`) keep client parsing predictable and errors honest (REQ-ERROR-005).
+6. **Money** (REQ-MONEY-001/002): integers in minor units (e.g. `45000` = 450.00) alongside an explicit ISO 4217 code. No floating point anywhere.
+7. **Deliberate denormalisation** (REQ-NORMAL-002): orders snapshot `unitPriceMinor` (price at purchase time) and store `totalAmountMinor` (quantity × unit price) so historical transaction value never depends on a listing's current or future price. The listing remains the authoritative source for *current* pricing; the order is authoritative for its *historical* snapshot.
+8. **Rate limiting in configuration** (REQ-RATE-002): the limits live in environment variables read by one middleware, not in route handlers, so operational tuning does not touch code.
+9. **Versioning** (REQ-API-001): `/api/v1` exists from the first release so future breaking changes ship as `/api/v2` without breaking existing consumers.
+10. **Realistic seed timestamps**: each row gets its own staggered `createdAt`/`updatedAt` spread over the past year instead of a shared `NOW()`, so pagination, sorting and the consumer's list views exercise non-uniform data (REQ-REALISTIC-003).
 
 ---
 
@@ -446,9 +446,11 @@ Live public URL: `https://<PUBLIC_API_URL>`
 
 Deploy steps (Render + Neon):
 1. Create a managed PostgreSQL project (e.g. Neon) and copy the connection string.
-2. Deploy this repo to Render as a web service:
+2. Deploy this repo to Render (`render.yaml` blueprints the service):
    - Build command: `npm install`
-   - Start command: `npm run migrate && npm run seed && npm start`
-3. Set environment variables `DATABASE_URL`, `PORT`, `NODE_ENV=production`, `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_MAX_REQUESTS`.
-4. Run the production seed (`npm run seed`) with the production `DATABASE_URL` (REQ-DEPLOY-003).
-5. Test from outside your machine via the public URL (REQ-DEPLOY-005) and with the consumer.
+   - Start command: `npm run migrate && npm start`
+   - Health check path: `/` (returns the API index JSON)
+3. Set environment variables `DATABASE_URL`, `PORT`, `NODE_ENV=production`, `RATE_LIMIT_WINDOW_SECONDS`, `RATE_LIMIT_MAX_REQUESTS`. `DATABASE_URL` must be the Neon connection string.
+4. Run the production seed once against the deployed `DATABASE_URL` (`render run npm run seed`) — do not put `seed` in the start command (REQ-DEPLOY-003).
+5. Copy the service URL from the Render dashboard (e.g. `https://<service-name>.onrender.com`); that is the public API URL to place in the consumer and README.
+6. Test from outside your machine via the public URL (REQ-DEPLOY-005) and with the consumer.
