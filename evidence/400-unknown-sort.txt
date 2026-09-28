@@ -1,0 +1,5 @@
+﻿EVIDENCE: unknown sort returns 400
+Command: curl.exe -s -o - -w `nHTTP %{http_code} http://localhost:3000/api/v1/listings?sort=nope
+
+{"error":{"code":"BAD_REQUEST","message":"sort: Unknown sort field 'nope'. Allowed: created_at, price_minor, title"}}`nHTTP 400
+

@@ -1,0 +1,5 @@
+﻿EVIDENCE: malformed cursor returns 400
+Command: curl.exe -s -o - -w `nHTTP %{http_code} http://localhost:3000/api/v1/listings?cursor=garbage
+
+{"error":{"code":"BAD_REQUEST","message":"Malformed cursor"}}`nHTTP 400
+

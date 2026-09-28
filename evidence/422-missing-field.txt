@@ -1,0 +1,5 @@
+﻿EVIDENCE: missing required POST field returns 422 + names field
+Command: curl.exe -s -o - -w `nHTTP %{http_code} -X POST -H Content-Type: application/json -d {} http://localhost:3000/api/v1/listings
+
+{"error":{"code":"VALIDATION_ERROR","message":"sellerId: Required; title: Required; description: Required; priceMinor: Required; currency: Required"}}`nHTTP 422
+

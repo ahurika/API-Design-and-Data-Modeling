@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html,body{margin:0;padding:0;background:#ffffff;}
+  svg{display:block;}
+  text{font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="860" viewBox="0 0 1120 860">
+  <title>Marketplace API ERD</title>
+
+  <!-- title -->
+  <text x="560" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="#111827">Marketplace API — Entity Relationship Diagram</text>
+  <text x="560" y="48" text-anchor="middle" font-size="13" fill="#6b7280">Buyers · Sellers · Listings · Orders · Reviews  (all identifiers are generated UUID v4)</text>
+
+  <!-- ============ SELLERS ============ -->
+  <g id="sellers">
+    <rect x="70" y="90" width="250" height="176" fill="#ffffff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <rect x="70" y="90" width="250" height="30" fill="#eef2ff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <text x="195" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">sellers</text>
+    <text x="82" y="144" font-size="13" fill="#111827">PK id  : uuid</text>
+    <text x="82" y="168" font-size="13" fill="#111827">name      : text</text>
+    <text x="82" y="192" font-size="13" fill="#111827">email     : text  [UQ]</text>
+    <text x="82" y="216" font-size="13" fill="#6b7280">created_at: tstz</text>
+    <text x="82" y="240" font-size="13" fill="#6b7280">updated_at: tstz</text>
+    <text x="82" y="264" font-size="13" fill="#6b7280">deleted_at: tstz  (soft)</text>
+  </g>
+
+  <!-- ============ LISTINGS ============ -->
+  <g id="listings">
+    <rect x="70" y="520" width="260" height="236" fill="#ffffff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <rect x="70" y="520" width="260" height="30" fill="#e0e7ff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <text x="200" y="540" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">listings</text>
+    <text x="82" y="574" font-size="13" fill="#111827">PK id       : uuid</text>
+    <text x="82" y="598" font-size="13" fill="#111827">FK seller_id→sellers.id</text>
+    <text x="82" y="622" font-size="13" fill="#111827">title       : text</text>
+    <text x="82" y="646" font-size="13" fill="#111827">description : text</text>
+    <text x="82" y="670" font-size="13" fill="#111827">price_minor : bigint ≥0</text>
+    <text x="82" y="694" font-size="13" fill="#111827">currency    : text [ISO]</text>
+    <text x="82" y="718" font-size="13" fill="#111827">status      : enum</text>
+    <text x="82" y="742" font-size="13" fill="#6b7280">created_at / updated_at / deleted_at</text>
+  </g>
+
+  <!-- ============ BUYERS ============ -->
+  <g id="buyers">
+    <rect x="770" y="90" width="250" height="176" fill="#ffffff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <rect x="770" y="90" width="250" height="30" fill="#ecfdf5" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <text x="895" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">buyers</text>
+    <text x="782" y="144" font-size="13" fill="#111827">PK id  : uuid</text>
+    <text x="782" y="168" font-size="13" fill="#111827">name      : text</text>
+    <text x="782" y="192" font-size="13" fill="#111827">email     : text  [UQ]</text>
+    <text x="782" y="216" font-size="13" fill="#6b7280">created_at: tstz</text>
+    <text x="782" y="240" font-size="13" fill="#6b7280">updated_at: tstz</text>
+    <text x="782" y="264" font-size="13" fill="#6b7280">deleted_at: tstz  (soft)</text>
+  </g>
+
+  <!-- ============ ORDERS ============ -->
+  <g id="orders">
+    <rect x="770" y="520" width="290" height="236" fill="#ffffff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <rect x="770" y="520" width="290" height="30" fill="#fef3c7" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <text x="915" y="540" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">orders</text>
+    <text x="782" y="574" font-size="13" fill="#111827">PK id                : uuid</text>
+    <text x="782" y="598" font-size="13" fill="#111827">FK buyer_id→buyers.id</text>
+    <text x="782" y="622" font-size="13" fill="#111827">FK listing_id→listings.id</text>
+    <text x="782" y="646" font-size="13" fill="#111827">quantity             : int  &gt;0</text>
+    <text x="782" y="670" font-size="13" fill="#111827">unit_price_minor     : bigint  (snap)</text>
+    <text x="782" y="694" font-size="13" fill="#111827">total_amount_minor   : bigint  = qty×price</text>
+    <text x="782" y="718" font-size="13" fill="#111827">currency : text   status: enum</text>
+    <text x="782" y="742" font-size="13" fill="#6b7280">created_at / updated_at (never deleted)</text>
+  </g>
+
+  <!-- ============ REVIEWS ============ -->
+  <g id="reviews">
+    <rect x="440" y="560" width="260" height="194" fill="#ffffff" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <rect x="440" y="560" width="260" height="30" fill="#fce7f3" stroke="#374151" stroke-width="1.4" rx="4"/>
+    <text x="570" y="580" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">reviews</text>
+    <text x="452" y="614" font-size="13" fill="#111827">PK id         : uuid</text>
+    <text x="452" y="638" font-size="13" fill="#111827">FK buyer_id→buyers.id</text>
+    <text x="452" y="662" font-size="13" fill="#111827">FK listing_id→listings.id</text>
+    <text x="452" y="686" font-size="13" fill="#111827">FK order_id→orders.id [UQ]</text>
+    <text x="452" y="710" font-size="13" fill="#111827">rating : smallint 1–5</text>
+    <text x="452" y="734" font-size="13" fill="#111827">comment: text  (never deleted)</text>
+  </g>
+
+  <!-- ============ RELATIONSHIP LINES ============ -->
+
+  <!-- sellers --- listings : 1..N -->
+  <line x1="195" y1="266" x2="195" y2="520" stroke="#111827" stroke-width="1.4"/>
+  <text x="206" y="380" font-size="12" fill="#374151">1 owns N</text>
+  <!-- crow foot at listins -->
+  <line x1="185" y1="505" x2="195" y2="520" stroke="#111827" stroke-width="1.2"/>
+  <line x1="195" y1="520" x2="205" y2="505" stroke="#111827" stroke-width="1.2"/>
+  <line x1="195" y1="520" x2="195" y2="492" stroke="#111827" stroke-width="1.2"/>
+
+  <!-- buyers --- orders : 1..N -->
+  <line x1="895" y1="266" x2="925" y2="520" stroke="#111827" stroke-width="1.4"/>
+  <text x="900" y="390" font-size="12" fill="#374151">1 places N</text>
+  <!-- crow foot at orders -->
+  <line x1="915" y1="505" x2="925" y2="520" stroke="#111827" stroke-width="1.2"/>
+  <line x1="925" y1="520" x2="935" y2="505" stroke="#111827" stroke-width="1.2"/>
+  <line x1="925" y1="520" x2="925" y2="494" stroke="#111827" stroke-width="1.2"/>
+
+  <!-- listings --- orders : 1..N (horizontal) -->
+  <line x1="330" y1="636" x2="770" y2="636" stroke="#111827" stroke-width="1.4"/>
+  <text x="470" y="628" font-size="12" fill="#374151">1 bought N</text>
+  <!-- crow foot at orders -->
+  <line x1="742" y1="626" x2="770" y2="636" stroke="#111827" stroke-width="1.2"/>
+  <line x1="770" y1="636" x2="742" y2="646" stroke="#111827" stroke-width="1.2"/>
+  <line x1="770" y1="636" x2="794" y2="636" stroke="#111827" stroke-width="1.2"/>
+
+  <!-- listings --- reviews (horizontal) -->
+  <line x1="330" y1="690" x2="440" y2="690" stroke="#111827" stroke-width="1.4"/>
+  <text x="360" y="682" font-size="12" fill="#374151">1 N</text>
+  <!-- crow foot at reviews -->
+  <line x1="420" y1="680" x2="440" y2="690" stroke="#111827" stroke-width="1.2"/>
+  <line x1="440" y1="690" x2="420" y2="700" stroke="#111827" stroke-width="1.2"/>
+  <line x1="440" y1="690" x2="458" y2="690" stroke="#111827" stroke-width="1.2"/>
+
+  <!-- orders --- reviews : 1..0/1 (horizontal) -->
+  <line x1="770" y1="668" x2="700" y2="668" stroke="#111827" stroke-width="1.4"/>
+  <text x="700" y="660" text-anchor="end" font-size="12" fill="#374151">1 gets 0..1</text>
+  <!-- crow foot '0..1' ring at reviews -->
+  <circle cx="700" cy="668" r="7" fill="#ffffff" stroke="#111827" stroke-width="1.2"/>
+  <text x="700" y="672" text-anchor="middle" font-size="10" fill="#111827">0..1</text>
+
+  <!-- buyers --- reviews : 1..N (diagonal) -->
+  <line x1="820" y1="266" x2="640" y2="560" stroke="#111827" stroke-width="1.4"/>
+  <text x="770" y="410" font-size="12" fill="#374151">1 writes N</text>
+  <!-- crow foot at reviews -->
+  <line x1="658" y1="548" x2="640" y2="560" stroke="#111827" stroke-width="1.2"/>
+  <line x1="640" y1="560" x2="630" y2="548" stroke="#111827" stroke-width="1.2"/>
+  <line x1="640" y1="560" x2="640" y2="578" stroke="#111827" stroke-width="1.2"/>
+
+  <!-- legend -->
+  <g id="legend">
+    <rect x="70" y="770" width="390" height="60" fill="#f9fafb" stroke="#d1d5db" rx="4"/>
+    <text x="82" y="790" font-size="12" font-weight="700" fill="#111827">Legend</text>
+    <line x1="82" y1="808" x2="110" y2="808" stroke="#111827" stroke-width="1.2"/>
+    <text x="116" y="812" font-size="11" fill="#374151">one        </text>
+    <line x1="82" y1="822" x2="110" y2="822" stroke="#111827" stroke-width="1.2"/>
+    <line x1="96" y1="812" x2="104" y2="822" stroke="#111827" stroke-width="1.2"/>
+    <line x1="104" y1="822" x2="96" y2="832" stroke="#111827" stroke-width="1.2"/>
+    <text x="116" y="826" font-size="11" fill="#374151">many (crow's foot) — UNIQUE(order_id) gives Orders→Reviews 0..1</text>
+  </g>
+</svg>
+</body>
+</html>

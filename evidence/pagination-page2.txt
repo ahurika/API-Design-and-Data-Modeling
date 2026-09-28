@@ -1,0 +1,43 @@
+﻿EVIDENCE: Pagination - page 2 (cursor continuation)
+Command: curl "http://localhost:3000/api/v1/listings?limit=20&cursor=<from page 1>"
+HTTP 200
+total=300 returned=20 hasMore=True
+
+No overlap with page 1: True
+
+First 3 items:
+[
+    {
+        "id":  "b0ff92be-aaa4-401a-ad62-dd68381e603d",
+        "sellerId":  "e59dc763-c548-4572-b13d-b264a9e3e745",
+        "title":  "Handmade Shoes",
+        "description":  "High-quality eco-friendly ring. Ships within 3–5 business days.",
+        "priceMinor":  1456700,
+        "currency":  "KES",
+        "status":  "ACTIVE",
+        "createdAt":  "2026-09-04T04:27:28.860000Z",
+        "updatedAt":  "2026-09-04T04:27:28.860000Z"
+    },
+    {
+        "id":  "ae17eba9-a52f-4113-9f20-0820fdb6fa0d",
+        "sellerId":  "9a73ac4c-bce7-405b-a2f0-7ffb70267548",
+        "title":  "Vintage Painting",
+        "description":  "High-quality artisan guitar. Ships within 3–5 business days.",
+        "priceMinor":  1260200,
+        "currency":  "EUR",
+        "status":  "ACTIVE",
+        "createdAt":  "2026-09-03T13:50:14.859000Z",
+        "updatedAt":  "2026-09-03T13:50:14.859000Z"
+    },
+    {
+        "id":  "d091c095-b65d-40bd-89d7-ca99d95b9429",
+        "sellerId":  "c1c4f3e0-01dd-4146-9bc5-8ef264a194b8",
+        "title":  "Handmade Bag",
+        "description":  "High-quality classic painting. Ships within 3–5 business days.",
+        "priceMinor":  4241600,
+        "currency":  "KES",
+        "status":  "DRAFT",
+        "createdAt":  "2026-09-01T06:54:34.855000Z",
+        "updatedAt":  "2026-09-01T06:54:34.855000Z"
+    }
+]

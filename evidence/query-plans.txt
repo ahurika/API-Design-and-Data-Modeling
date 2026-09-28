@@ -1,0 +1,82 @@
+==== Query 1 — Buyer discovers active listings (Action 1) ================================================
+A. Real plan chosen by the PostgreSQL planner at seed volume:
+Limit  (cost=0.56..7.35 rows=21 width=183) (actual time=0.119..0.123 rows=21.00 loops=1)
+  Output: id, seller_id, title, description, price_minor, currency, status, created_at, updated_at
+  Buffers: shared hit=22
+  ->  Incremental Sort  (cost=0.56..57.78 rows=177 width=183) (actual time=0.117..0.120 rows=21.00 loops=1)
+        Output: id, seller_id, title, description, price_minor, currency, status, created_at, updated_at
+        Sort Key: listings.created_at DESC, listings.id DESC
+        Presorted Key: listings.created_at
+        Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 30kB  Peak Memory: 30kB
+        Buffers: shared hit=22
+        ->  Index Scan using idx_listings_status_created_at on public.listings  (cost=0.27..49.82 rows=177 width=183) (actual time=0.025..0.097 rows=22.00 loops=1)
+              Output: id, seller_id, title, description, price_minor, currency, status, created_at, updated_at
+              Index Cond: (listings.status = 'ACTIVE'::listing_status)
+              Filter: (listings.deleted_at IS NULL)
+              Index Searches: 1
+              Buffers: shared hit=22
+Query Identifier: 1830089745091965117
+Planning Time: 0.100 ms
+Execution Time: 0.153 ms
+
+B. Plan with enable_seqscan=off to show the matching index being used:
+Limit  (cost=0.56..7.35 rows=21 width=183) (actual time=0.092..0.095 rows=21.00 loops=1)
+  Output: id, seller_id, title, description, price_minor, currency, status, created_at, updated_at
+  Buffers: shared hit=22
+  ->  Incremental Sort  (cost=0.56..57.78 rows=177 width=183) (actual time=0.090..0.092 rows=21.00 loops=1)
+        Output: id, seller_id, title, description, price_minor, currency, status, created_at, updated_at
+        Sort Key: listings.created_at DESC, listings.id DESC
+        Presorted Key: listings.created_at
+        Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 30kB  Peak Memory: 30kB
+        Buffers: shared hit=22
+        ->  Index Scan using idx_listings_status_created_at on public.listings  (cost=0.27..49.82 rows=177 width=183) (actual time=0.026..0.074 rows=22.00 loops=1)
+              Output: id, seller_id, title, description, price_minor, currency, status, created_at, updated_at
+              Index Cond: (listings.status = 'ACTIVE'::listing_status)
+              Filter: (listings.deleted_at IS NULL)
+              Index Searches: 1
+              Buffers: shared hit=22
+Query Identifier: 1830089745091965117
+Planning Time: 0.119 ms
+Execution Time: 0.125 ms
+
+==== Query 2 — Buyer views their orders (Action 3) ================================================
+A. Real plan chosen by the PostgreSQL planner at seed volume:
+Limit  (cost=8.30..8.35 rows=2 width=155) (actual time=2.455..2.456 rows=1.00 loops=1)
+  Output: id, buyer_id, listing_id, quantity, unit_price_minor, total_amount_minor, currency, status, created_at, updated_at
+  Buffers: shared read=3 dirtied=1
+  ->  Incremental Sort  (cost=8.30..8.35 rows=2 width=155) (actual time=2.453..2.454 rows=1.00 loops=1)
+        Output: id, buyer_id, listing_id, quantity, unit_price_minor, total_amount_minor, currency, status, created_at, updated_at
+        Sort Key: orders.created_at DESC, orders.id DESC
+        Presorted Key: orders.created_at
+        Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+        Buffers: shared read=3 dirtied=1
+        ->  Index Scan using idx_orders_buyer_id_created_at on public.orders  (cost=0.27..8.29 rows=1 width=155) (actual time=2.441..2.443 rows=1.00 loops=1)
+              Output: id, buyer_id, listing_id, quantity, unit_price_minor, total_amount_minor, currency, status, created_at, updated_at
+              Index Cond: (orders.buyer_id = '006072d0-baec-4658-9b73-b567a71fcb63'::text)
+              Index Searches: 1
+              Buffers: shared read=3 dirtied=1
+Query Identifier: 7549095276425310460
+Planning:
+  Buffers: shared hit=94 read=6 dirtied=2
+Planning Time: 6.390 ms
+Execution Time: 2.501 ms
+
+B. Plan with enable_seqscan=off to show the matching index being used:
+Limit  (cost=8.30..8.35 rows=2 width=155) (actual time=0.025..0.026 rows=1.00 loops=1)
+  Output: id, buyer_id, listing_id, quantity, unit_price_minor, total_amount_minor, currency, status, created_at, updated_at
+  Buffers: shared hit=3
+  ->  Incremental Sort  (cost=8.30..8.35 rows=2 width=155) (actual time=0.024..0.024 rows=1.00 loops=1)
+        Output: id, buyer_id, listing_id, quantity, unit_price_minor, total_amount_minor, currency, status, created_at, updated_at
+        Sort Key: orders.created_at DESC, orders.id DESC
+        Presorted Key: orders.created_at
+        Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+        Buffers: shared hit=3
+        ->  Index Scan using idx_orders_buyer_id_created_at on public.orders  (cost=0.27..8.29 rows=1 width=155) (actual time=0.016..0.017 rows=1.00 loops=1)
+              Output: id, buyer_id, listing_id, quantity, unit_price_minor, total_amount_minor, currency, status, created_at, updated_at
+              Index Cond: (orders.buyer_id = '006072d0-baec-4658-9b73-b567a71fcb63'::text)
+              Index Searches: 1
+              Buffers: shared hit=3
+Query Identifier: 7549095276425310460
+Planning Time: 0.097 ms
+Execution Time: 0.049 ms
+

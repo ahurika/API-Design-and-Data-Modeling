@@ -1,0 +1,6 @@
+﻿EVIDENCE: Sorting - sort=created_at&order=asc
+Command: curl "http://localhost:3000/api/v1/listings?sort=created_at&order=asc&limit=3"
+HTTP 200
+
+{"data":[{"id":"6724055b-e3ea-46ed-addf-d4e76cd667bf","sellerId":"12b4dc86-aa9d-46e2-8516-9263ae163d5c","title":"Luxury Lamp","description":"High-quality vintage headphones. Ships within 3–5 business days.","priceMinor":2985900,"currency":"USD","status":"DRAFT","createdAt":"2025-09-29T09:49:58.855000Z","updatedAt":"2025-09-29T09:49:58.855000Z"},{"id":"5ce4fee3-21fa-4e24-947b-1546271ad1dc","sellerId":"6ab374c0-149c-4f65-a650-821ef4e48a38","title":"Classic Desk","description":"High-quality eco-friendly mug. Ships within 3–5 business days.","priceMinor":4055200,"currency":"USD","status":"ACTIVE","createdAt":"2025-09-30T20:54:57.859000Z","updatedAt":"2025-09-30T20:54:57.859000Z"},{"id":"a655e973-ef81-4a93-8245-81a6eecc5d60","sellerId":"ab0f273d-92ba-42fe-9759-4a325a1de2b6","title":"Luxury Phone","description":"High-quality artisan monitor. Ships within 3–5 business days.","priceMinor":509600,"currency":"USD","status":"ACTIVE","createdAt":"2025-10-01T23:51:32.861000Z","updatedAt":"2025-10-01T23:51:32.861000Z"}],"meta":{"total":300,"limit":3,"hasMore":true,"nextCursor":"eyJpZCI6ImE2NTVlOTczLWVmODEtNGE5My04MjQ1LTgxYTZlZWNjNWQ2MCIsInNvcnRWYWx1ZSI6IjIwMjUtMTAtMDFUMjM6NTE6MzIuODYxMDAwWiJ9"}}
+

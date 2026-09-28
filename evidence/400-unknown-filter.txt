@@ -1,0 +1,5 @@
+﻿EVIDENCE: unknown filter returns 400
+Command: curl.exe -s -o - -w `nHTTP %{http_code} http://localhost:3000/api/v1/listings?foo=bar
+
+{"error":{"code":"BAD_REQUEST","message":": Unrecognized key(s) in object: 'foo'"}}`nHTTP 400
+

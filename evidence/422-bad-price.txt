@@ -1,0 +1,5 @@
+﻿EVIDENCE: semantically invalid field (negative price) returns 422 and names the field
+Command: curl -X POST -H Content-Type:application/json -d neg-price.json http://localhost:3000/api/v1/listings
+
+{"error":{"code":"VALIDATION_ERROR","message":"description: Required; priceMinor: Number must be greater than or equal to 0"}}`nHTTP 422
+

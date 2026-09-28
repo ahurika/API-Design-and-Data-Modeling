@@ -1,0 +1,106 @@
+﻿EVIDENCE: Validate - schema/constraints/indexes present (REQ-CONSTRAINT-*, REQ-INDEX-*) and realistic volumes (REQ-SEED-002)
+Command: node src/db/validate.js
+
+Validating database against ERD …
+
+Tables / columns:
+(node:11784) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  [PASS] buyers exists
+  [PASS] buyers.id
+  [PASS] buyers.name
+  [PASS] buyers.email
+  [PASS] buyers.created_at
+  [PASS] buyers.updated_at
+  [PASS] buyers.deleted_at
+  [PASS] sellers exists
+  [PASS] sellers.id
+  [PASS] sellers.name
+  [PASS] sellers.email
+  [PASS] sellers.created_at
+  [PASS] sellers.updated_at
+  [PASS] sellers.deleted_at
+  [PASS] listings exists
+  [PASS] listings.id
+  [PASS] listings.seller_id
+  [PASS] listings.title
+  [PASS] listings.description
+  [PASS] listings.price_minor
+  [PASS] listings.currency
+  [PASS] listings.status
+  [PASS] listings.created_at
+  [PASS] listings.updated_at
+  [PASS] listings.deleted_at
+  [PASS] orders exists
+  [PASS] orders.id
+  [PASS] orders.buyer_id
+  [PASS] orders.listing_id
+  [PASS] orders.quantity
+  [PASS] orders.unit_price_minor
+  [PASS] orders.total_amount_minor
+  [PASS] orders.currency
+  [PASS] orders.status
+  [PASS] orders.created_at
+  [PASS] orders.updated_at
+  [PASS] reviews exists
+  [PASS] reviews.id
+  [PASS] reviews.buyer_id
+  [PASS] reviews.listing_id
+  [PASS] reviews.order_id
+  [PASS] reviews.rating
+  [PASS] reviews.comment
+  [PASS] reviews.created_at
+  [PASS] reviews.updated_at
+
+Constraints:
+  [PASS] buyers.buyers_email_unique
+  [PASS] sellers.sellers_email_unique
+  [PASS] listings.listings_seller_fk
+  [PASS] listings.listings_price_nonneg
+  [PASS] orders.orders_buyer_fk
+  [PASS] orders.orders_listing_fk
+  [PASS] orders.orders_quantity_positive
+  [PASS] orders.orders_unit_price_nonneg
+  [PASS] orders.orders_total_amount_nonneg
+  [PASS] reviews.reviews_buyer_fk
+  [PASS] reviews.reviews_listing_fk
+  [PASS] reviews.reviews_order_fk
+  [PASS] reviews.reviews_order_unique
+  [PASS] reviews.reviews_rating_range
+
+Indexes:
+  [PASS] idx_listings_status_created_at
+  [PASS] idx_listings_status_currency_price
+  [PASS] idx_listings_seller_id_created_at
+  [PASS] idx_orders_buyer_id_created_at
+  [PASS] idx_reviews_listing_id_created_at
+
+Seed volume:
+  [PASS] buyers count >= 150
+  [PASS] sellers count >= 150
+  [PASS] listings count >= 250
+  [PASS] orders count >= 250
+  [PASS] reviews count >= 150
+
+Business invariants:
+  [PASS] all reviews reference COMPLETED orders
+  [PASS] review buyer matches order buyer
+  [PASS] review listing matches order listing
+
+Identifiers:
+  [PASS] buyers uses UUID v4-style generated IDs
+  [PASS] sellers uses UUID v4-style generated IDs
+  [PASS] listings uses UUID v4-style generated IDs
+  [PASS] orders uses UUID v4-style generated IDs
+  [PASS] reviews uses UUID v4-style generated IDs
+
+All local validation checks passed ✓
+
+

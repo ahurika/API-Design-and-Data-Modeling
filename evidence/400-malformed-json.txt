@@ -1,0 +1,5 @@
+﻿EVIDENCE: malformed JSON body returns 400
+Command: curl.exe -s -o - -w `nHTTP %{http_code} -X POST -H Content-Type: application/json -d {bad json http://localhost:3000/api/v1/listings
+
+{"error":{"code":"BAD_REQUEST","message":"Malformed JSON body"}}`nHTTP 400
+

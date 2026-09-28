@@ -1,0 +1,5 @@
+﻿EVIDENCE: valid but missing ID returns 404
+Command: curl.exe -s -o - -w `nHTTP %{http_code} http://localhost:3000/api/v1/listings/00000000-0000-4000-8000-000000000000
+
+{"error":{"code":"NOT_FOUND","message":"Listing not found"}}`nHTTP 404
+

@@ -1,0 +1,6 @@
+﻿EVIDENCE: Sorting - sort=created_at&order=desc
+Command: curl "http://localhost:3000/api/v1/listings?sort=created_at&order=desc&limit=3"
+HTTP 200
+
+{"data":[{"id":"94b70541-0fda-4006-9d19-4f2739a19027","sellerId":"1508b709-7bd5-4cf4-89d7-617fe6317a83","title":"Vintage Jacket","description":"High-quality classic guitar. Ships within 3–5 business days.","priceMinor":4719200,"currency":"KES","status":"ARCHIVED","createdAt":"2026-09-27T02:33:59.857000Z","updatedAt":"2026-09-27T02:33:59.857000Z"},{"id":"54041d77-4ecc-461e-9dd4-ed313c9df1f2","sellerId":"c1bc191f-958a-418b-9b80-4d66256c1694","title":"Rare Keyboard","description":"High-quality classic mug. Ships within 3–5 business days.","priceMinor":1593800,"currency":"EUR","status":"DRAFT","createdAt":"2026-09-26T18:38:24.859000Z","updatedAt":"2026-09-26T18:38:24.859000Z"},{"id":"30f42844-5e54-49ff-bcea-4b0f74708c1f","sellerId":"c3e4364c-7c77-4d08-8edc-3b50bf884d71","title":"Luxury Sneakers","description":"High-quality modern monitor. Ships within 3–5 business days.","priceMinor":2836200,"currency":"EUR","status":"ACTIVE","createdAt":"2026-09-26T05:08:26.860000Z","updatedAt":"2026-09-26T05:08:26.860000Z"}],"meta":{"total":300,"limit":3,"hasMore":true,"nextCursor":"eyJpZCI6IjMwZjQyODQ0LTVlNTQtNDlmZi1iY2VhLTRiMGY3NDcwOGMxZiIsInNvcnRWYWx1ZSI6IjIwMjYtMDktMjZUMDU6MDg6MjYuODYwMDAwWiJ9"}}
+

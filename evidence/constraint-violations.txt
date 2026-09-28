@@ -1,0 +1,24 @@
+==== Violation 1 — FOREIGN KEY: listing with a nonexistent seller ====
+Why: REQ-CONSTRAINT-002 / listings_seller_fk: a listing cannot exist without a valid seller
+SQL: INSERT INTO listings (seller_id, title, description, price_minor, currency, status)
+            VALUES ('00000000-0000-4000-8000-000000000000', 'Orphan Listing', 'no such seller', 1000, 'NGN', 'ACTIVE');
+Result: REJECTED — PostgreSQL returned:
+  insert or update on table "listings" violates foreign key constraint "listings_seller_fk"
+  SQLSTATE: 23503
+
+==== Violation 2 — CHECK: listing with a negative price ====
+Why: REQ-MONEY-001 / listings_price_nonneg: price_minor must be >= 0 (no float money, no negative price)
+SQL: INSERT INTO listings (seller_id, title, description, price_minor, currency, status)
+            VALUES ('71341685-337e-4641-bfcb-2a5099174b24', 'Free Money', 'negative price', -500, 'NGN', 'ACTIVE');
+Result: REJECTED — PostgreSQL returned:
+  new row for relation "listings" violates check constraint "listings_price_nonneg"
+  SQLSTATE: 23514
+
+==== Violation 3 — UNIQUE: duplicate buyer email ====
+Why: buyers_email_unique: one buyer record per email address
+SQL: INSERT INTO buyers (name, email)
+            VALUES ('Duplicate Email', 'buyer1@example.com');
+Result: REJECTED — PostgreSQL returned:
+  duplicate key value violates unique constraint "buyers_email_unique"
+  SQLSTATE: 23505
+

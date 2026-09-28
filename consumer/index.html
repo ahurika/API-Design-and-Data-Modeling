@@ -3,86 +3,119 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Marketplace API — Consumer</title>
+  <title>Marketplace API — Live listings</title>
   <style>
-    :root { --border: #dfe3e8; --muted: #6b7280; --accent: #2563eb; }
+    :root {
+      --line: #ccc;
+      --ink: #222;
+      --muted: #666;
+    }
     * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 24px; font: 15px/1.5 system-ui, sans-serif;
-      background: #f8fafc; color: #111827;
+      margin: 0;
+      padding: 28px 20px;
+      background: #fff;
+      color: var(--ink);
+      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
     }
-    main { max-width: 760px; margin: 0 auto; }
-    h1 { font-size: 20px; margin: 0 0 4px; }
-    .endpoint { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
-    .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-    select, button {
-      padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
-      background: #fff; font-size: 14px; cursor: pointer;
+    main { max-width: 780px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+    .endpoint {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 0 0 22px;
+      word-break: break-all;
     }
-    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    ul { list-style: none; margin: 0; padding: 0; }
-    li {
-      background: #fff; border: 1px solid var(--border); border-radius: 8px;
-      padding: 12px 16px; margin-bottom: 8px;
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    .controls { margin-bottom: 16px; }
+    .controls label { font-size: 13px; color: var(--muted); margin-right: 6px; }
+    .controls select, .controls button {
+      font: inherit;
+      padding: 6px 10px;
+      margin-right: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
     }
-    .title { font-weight: 600; }
-    .sub { color: var(--muted); font-size: 13px; }
-    .price { font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .chip {
-      font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
-      padding: 2px 8px; border-radius: 999px; background: #eef2ff; color: #4338ca;
+    .controls button:disabled {
+      color: #999;
+      cursor: not-allowed;
     }
-    .state { padding: 16px; text-align: center; color: var(--muted); background: #fff;
-      border: 1px dashed var(--border); border-radius: 8px; }
-    .state.error { color: #b91c1c; }
-    .state.error, .state.empty { border-color: #fecaca; }
-    footer { margin-top: 16px; display: flex; justify-content: space-between;
-      align-items: center; color: var(--muted); font-size: 13px; }
-    a { color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e2e2;
+      vertical-align: top;
+    }
+    th {
+      font-weight: 600;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--line);
+    }
+    td:last-child, th:last-child { text-align: right; }
+    .price { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .status { color: var(--muted); text-transform: uppercase; font-size: 12px; }
+    .state {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .state.error { border-color: #c00; color: #a00; }
+    footer {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a { color: #2255bb; }
   </style>
 </head>
 <body>
   <main>
     <h1>Marketplace API — live listings</h1>
-    <p class="endpoint" id="endpoint">Loading…</p>
+    <p class="endpoint" id="endpoint"></p>
 
     <div class="controls">
-      <select id="statusFilter" aria-label="Filter by status">
-        <option value="">All statuses</option>
+      <label for="statusFilter">Status</label>
+      <select id="statusFilter">
+        <option value="">All</option>
         <option value="ACTIVE">ACTIVE</option>
         <option value="DRAFT">DRAFT</option>
         <option value="SOLD_OUT">SOLD_OUT</option>
         <option value="ARCHIVED">ARCHIVED</option>
       </select>
-      <select id="limit" aria-label="Page size">
-        <option value="20">20 per page</option>
-        <option value="50">50 per page</option>
-        <option value="100">100 per page</option>
+      <label for="limit">Per page</label>
+      <select id="limit">
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
       </select>
-      <button id="nextBtn" class="primary">Next page →</button>
+      <button id="nextBtn">Next page</button>
     </div>
 
     <div id="list"></div>
 
     <footer>
       <span id="meta"></span>
-      <span><a id="publishUrl" href="#" target="_blank" rel="noopener">publish</a></span>
+      <span id="pageInfo"></span>
     </footer>
   </main>
 
   <script>
     'use strict';
 
-    // ─────────────────────────────────────────────────────────────────────────────
     // The consumer must call the deployed PUBLIC URL, never localhost
-    // (REQ-CONSUMER-002). Replace PUBLIC_API_URL_HERE with the deployed URL.
-    // ─────────────────────────────────────────────────────────────────────────────
+    // (REQ-CONSUMER-002). Replace the placeholder with the deployed URL.
     var API_BASE = 'PUBLIC_API_URL_HERE';
 
     var listEl     = document.getElementById('list');
     var metaEl     = document.getElementById('meta');
+    var pageInfoEl = document.getElementById('pageInfo');
     var statusEl   = document.getElementById('statusFilter');
     var limitEl    = document.getElementById('limit');
     var nextBtn    = document.getElementById('nextBtn');
@@ -92,12 +125,23 @@
       data: [],
       meta: null,
       cursor: null,
+      page: 0,
       loading: false,
       error: null,
     };
 
+    function endpointUrl() {
+      return API_BASE.replace(/\/$/, '') + '/api/v1/listings';
+    }
+
     function render() {
-      endpointEl.textContent = 'GET ' + API_BASE.replace(/\/$/, '') + '/api/v1/listings';
+      endpointEl.textContent = 'GET ' + endpointUrl();
+
+      if (state.page === 0) {
+        paginateMeta('');
+      } else {
+        paginateMeta('page ' + state.page + ' loaded from nextCursor');
+      }
 
       if (state.loading) {
         listEl.innerHTML = '<div class="state">Loading listings…</div>';
@@ -115,28 +159,32 @@
       }
 
       if (!state.data || state.data.length === 0) {
-        listEl.innerHTML = '<div class="state empty">No listings match this filter.</div>';
+        listEl.innerHTML = '<div class="state">No listings match this filter.</div>';
         nextBtn.disabled = true;
-        metaEl.textContent = state.meta ? '0 of ' + state.meta.total : '';
+        metaEl.textContent = state.meta ? '0 of ' + state.meta.total + ' listings' : '';
         return;
       }
 
-      var lis = state.data.map(function (l) {
+      var rows = state.data.map(function (l) {
         var price = (l.priceMinor / 100).toLocaleString(undefined, {
-          minimumFractionDigits: 2, maximumFractionDigits: 2,
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
         });
         return (
-          '<li>' +
-            '<div><span class="title">' + escapeHtml(l.title) + '</span>' +
-            '<div class="sub">' + escapeHtml(l.id) + '</div></div>' +
-            '<div style="text-align:right"><div class="price">' +
-              price + ' ' + escapeHtml(l.currency) + '</div>' +
-            '<span class="chip">' + escapeHtml(l.status) + '</span></div>' +
-          '</li>'
+          '<tr>' +
+            '<td>' + escapeHtml(l.title) +
+              '<div style="color:#666;font-size:12px">' + escapeHtml(l.id) + '</div></td>' +
+            '<td class="price">' + price + ' ' + escapeHtml(l.currency) + '</td>' +
+            '<td class="status">' + escapeHtml(l.status) + '</td>' +
+          '</tr>'
         );
       });
 
-      listEl.innerHTML = '<ul>' + lis.join('') + '</ul>';
+      listEl.innerHTML =
+        '<table>' +
+          '<thead><tr><th>Title</th><th>Price</th><th>Status</th></tr></thead>' +
+          '<tbody>' + rows.join('') + '</tbody>' +
+        '</table>';
 
       if (state.meta) {
         metaEl.textContent = state.data.length + ' of ' + state.meta.total + ' listings';
@@ -144,16 +192,18 @@
       nextBtn.disabled = !state.meta || !state.meta.hasMore;
     }
 
+    function paginateMeta(text) {
+      pageInfoEl.textContent = text;
+    }
+
     function buildUrl(cursor) {
       var params = [];
-
-      if (state.filters && state.filters.status) params.push('status=' + encodeURIComponent(state.filters.status));
+      if (state.filters.status) params.push('status=' + encodeURIComponent(state.filters.status));
       params.push('limit=' + encodeURIComponent(state.filters.limit));
       params.push('sort=created_at');
       params.push('order=desc');
       if (cursor) params.push('cursor=' + encodeURIComponent(cursor));
-
-      return API_BASE.replace(/\/$/, '') + '/api/v1/listings?' + params.join('&');
+      return endpointUrl() + '?' + params.join('&');
     }
 
     function load(cursor) {
@@ -177,6 +227,7 @@
           state.data = json.data;
           state.meta = json.meta;
           state.cursor = json.meta && json.meta.hasMore ? json.meta.nextCursor : null;
+          if (cursor) state.page += 1;
           state.loading = false;
           render();
         })
@@ -188,6 +239,7 @@
     }
 
     function refresh() {
+      state.page = 0;
       state.filters = {
         status: statusEl.value,
         limit: limitEl.value,
@@ -205,14 +257,12 @@
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
-    // If the placeholder wasn't replaced, show a clear empty/error state rather than
-    // silently calling an invalid URL.
+    // If the placeholder wasn't replaced, show a clear error state rather than
+    // silently calling an invalid URL. Localhost is not allowed for the consumer.
     if (API_BASE === 'PUBLIC_API_URL_HERE' || /localhost|127\.0\.0\.1/.test(API_BASE)) {
       state.error = 'PUBLIC_API_URL must be set to the deployed URL (localhost is not allowed for the consumer).';
       render();
     } else {
-      document.getElementById('publishUrl').textContent = API_BASE;
-      document.getElementById('publishUrl').href = API_BASE;
       refresh();
     }
   </script>

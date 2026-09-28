@@ -1,0 +1,23 @@
+EVIDENCE: IP rate limiting (REQ-RATE-001/002/003) - 429 + Retry-After + error envelope
+Source: rapid-fire script fired 140 concurrent requests from 127.0.0.1
+Config (from .env / env): RATE_LIMIT_WINDOW_SECONDS=60, RATE_LIMIT_MAX_REQUESTS=100
+Status histogram: {"200":100,"429":40}
+Retry-After header present on 429(s): "60"
+
+First 429 response (headers + body):
+HTTP 429
+access-control-allow-origin: *
+access-control-allow-methods: GET,POST,PATCH,DELETE,OPTIONS
+access-control-allow-headers: Content-Type
+ratelimit-policy: 100;w=60
+ratelimit-limit: 100
+ratelimit-remaining: 0
+ratelimit-reset: 60
+retry-after: 60
+content-type: application/json; charset=utf-8
+content-length: 122
+etag: W/"7a-64Zj7PWPHm3i7ue+uHeP2b5nYwA"
+date: Mon, 28 Sep 2026 17:46:43 GMT
+connection: close
+
+{"error":{"code":"RATE_LIMITED","message":"Too many requests. Limit is 100 per 60s. Retry after the Retry-After period."}}
