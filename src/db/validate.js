@@ -93,9 +93,9 @@ async function validate() {
   const indexes = idxRows.map((r) => r.indexname);
   for (const i of EXPECTED_INDEXES) check(i, indexes.includes(i), 'index not found');
 
-  // 4. Seed volume (REQ-SEED-002)
+  // 4. Seed volume (REQ-SEED-002) — a few hundred records per resource
   console.log('\nSeed volume:');
-  const volumeTarget = { buyers: 100, sellers: 100, listings: 200, orders: 200, reviews: 100 };
+  const volumeTarget = { buyers: 150, sellers: 150, listings: 250, orders: 250, reviews: 150 };
   for (const [table, min] of Object.entries(volumeTarget)) {
     const { rows } = await pool.query(`SELECT COUNT(*) FROM ${table}`);
     const count = parseInt(rows[0].count, 10);

@@ -125,7 +125,7 @@ Retry-After: 60
 #### `GET /api/v1/buyers` — list buyers
 
 Filters: `email` (email), `createdAt` (RFC 3339 timestamp).
-Sort fields: `createdAt`.
+Sort fields: `created_at`.
 
 ```bash
 curl "https://<PUBLIC_API_URL>/api/v1/buyers?limit=20&sort=created_at&order=desc"
@@ -162,7 +162,7 @@ Response `200` with `{ "data": { ... } }`. Missing buyer → `404`.
 
 #### `GET /api/v1/sellers` — list sellers
 
-Filters: `email`, `createdAt`. Sort fields: `createdAt`.
+Filters: `email`, `createdAt`. Sort fields: `created_at`.
 
 ```bash
 curl "https://<PUBLIC_API_URL>/api/v1/sellers?limit=20"
@@ -181,7 +181,7 @@ curl "https://<PUBLIC_API_URL>/api/v1/sellers/<id>"
 #### `GET /api/v1/listings` — list listings (Action 1: buyer discovers listings)
 
 Filters: `sellerId`, `status` (`DRAFT|ACTIVE|SOLD_OUT|ARCHIVED`), `currency` (3-letter).
-Sort fields: `createdAt`, `priceMinor`, `title`.
+Sort fields: `created_at`, `price_minor`, `title`.
 
 ```bash
 curl "https://<PUBLIC_API_URL>/api/v1/listings?status=ACTIVE&currency=NGN&sort=price_minor&limit=20&order=asc"
@@ -266,7 +266,7 @@ curl -X DELETE "https://<PUBLIC_API_URL>/api/v1/listings/<id>"
 #### `GET /api/v1/orders` — list orders
 
 Filters: `buyerId`, `listingId`, `status` (`PENDING|CONFIRMED|COMPLETED|CANCELLED`).
-Sort fields: `createdAt`, `totalAmountMinor`.
+Sort fields: `created_at`, `total_amount_minor`.
 
 ```bash
 curl "https://<PUBLIC_API_URL>/api/v1/orders?buyerId=<BUYER_ID>&status=COMPLETED&limit=20"
@@ -326,7 +326,7 @@ curl -X DELETE "https://<PUBLIC_API_URL>/api/v1/orders/<id>"
 
 #### `GET /api/v1/reviews` — list reviews (Action 5)
 
-Filters: `buyerId`, `listingId`, `rating` (1–5). Sort fields: `createdAt`, `rating`.
+Filters: `buyerId`, `listingId`, `rating` (1–5). Sort fields: `created_at`, `rating`.
 
 ```bash
 curl "https://<PUBLIC_API_URL>/api/v1/reviews?listingId=<LISTING_ID>&rating=5&limit=20"
@@ -401,7 +401,7 @@ npm run seed           # repeatable; safe to run multiple times
 npm run validate       # local validation: schema, constraints, indexes, volume, invariants
 ```
 
-Seed volumes (REQ-SEED-002): 50 sellers, 50 buyers, 300 listings, 400 orders, ~200 reviews. Seeding uses `ON CONFLICT` upserts so re-running creates no duplicates (REQ-SEED-001), and every cross-entity relationship satisfies the constraints (REQ-SEED-003).
+Seed volumes (REQ-SEED-002): 200 sellers, 200 buyers, 300 listings, 400 orders, ~200 reviews. Seeding truncates then recreates the seed data inside one transaction so re-running produces the same known state with no duplicates (REQ-SEED-001), and every cross-entity relationship satisfies the constraints (REQ-SEED-003).
 
 ---
 

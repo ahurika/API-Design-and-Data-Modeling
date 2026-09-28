@@ -55,8 +55,12 @@ app.use((req, res) => {
 });
 
 // Central error handler (REQ-API-008, REQ-ERROR-005)
+// Malformed JSON bodies → 400 (client error), everything else → 500.
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
+  if (err && (err.type === 'entity.parse.failed' || err instanceof SyntaxError)) {
+    return res.status(400).json(errorResponse('BAD_REQUEST', 'Malformed JSON body'));
+  }
   console.error('Unhandled error:', err);
   res.status(500).json(errorResponse('INTERNAL_ERROR', 'Unexpected server error'));
 });

@@ -72,13 +72,14 @@ router.get('/', validateQuery(orderListQuery), async (req, res, next) => {
 
     // Count for total
     const filterParamCount = params.length - (cursor ? 2 : 0);
-    const filterParams     = params.slice(0, filterParamCount);
-    const countWhere       = where.filter((c) => !c.includes(operator)).join(' AND ');
+    const cursorClause     = cursor ? where.pop() : null;
+    const countWhere       = where.join(' AND ');
     const { rows: countRows } = await pool.query(
       `SELECT COUNT(*) FROM orders ${countWhere ? `WHERE ${countWhere}` : ''}`,
-      filterParams,
+      params.slice(0, filterParamCount),
     );
     const total = parseInt(countRows[0].count, 10);
+    if (cursorClause) where.push(cursorClause);
 
     params.push(limit + 1);
     const { rows } = await pool.query(

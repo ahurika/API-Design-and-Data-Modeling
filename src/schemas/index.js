@@ -10,12 +10,16 @@ const { z } = require('zod');
 // ─── Common building blocks ──────────────────────────────────────────────────
 
 // cursor pagination list query (REQ-API-003, REQ-API-004)
+// limit is CLAMPED to 100, never rejected (matrix: `limit=5000` → 200, 100 rows).
+// list queries are strict: unknown filter params → 400 (matrix: unknown filter → 400).
+const LIST_LIMIT = z.coerce.number().int().min(1).transform((v) => Math.min(v, 100));
+
 const listQuery = z.object({
-  limit:  z.coerce.number().int().min(1).max(100).default(20),
+  limit:  LIST_LIMIT.default(20),
   cursor: z.string().optional(),
   sort:   z.string().optional(),
   order:  z.enum(['asc', 'desc']).default('desc'),
-});
+}).strict();
 
 // ─── Buyers ─────────────────────────────────────────────────────────────────
 

@@ -74,11 +74,11 @@ router.get('/', validateQuery(listingListQuery), async (req, res, next) => {
     const whereClause = `WHERE ${where.join(' AND ')}`;
 
     // Count without cursor (REQ-API-004: total)
-    const filterParams = params.filter((_, i) => i < params.length - (cursor ? 2 : 0));
-    const countWhere   = where.filter((c) => !c.includes(operator)).join(' AND ');
+    const filterParamCount = params.length - (cursor ? 2 : 0);
+    const countWhere       = where.slice(0, Math.max(1, where.length - (cursor ? 1 : 0)));
     const { rows: countRows } = await pool.query(
-      `SELECT COUNT(*) FROM listings WHERE ${countWhere}`,
-      filterParams,
+      `SELECT COUNT(*) FROM listings WHERE ${countWhere.join(' AND ')}`,
+      params.slice(0, filterParamCount),
     );
     const total = parseInt(countRows[0].count, 10);
 

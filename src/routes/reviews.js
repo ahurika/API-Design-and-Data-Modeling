@@ -66,13 +66,14 @@ router.get('/', validateQuery(reviewListQuery), async (req, res, next) => {
 
     // Total count ignores cursor but honours active filters (REQ-API-004)
     const filterParamCount = params.length - (cursor ? 2 : 0);
-    const filterParams     = params.slice(0, filterParamCount);
-    const countWhere       = where.filter((c) => !c.includes(operator)).join(' AND ');
+    const cursorClause     = cursor ? where.pop() : null;
+    const countWhere       = where.join(' AND ');
     const { rows: countRows } = await pool.query(
       `SELECT COUNT(*) FROM reviews ${countWhere ? `WHERE ${countWhere}` : ''}`,
-      filterParams,
+      params.slice(0, filterParamCount),
     );
     const total = parseInt(countRows[0].count, 10);
+    if (cursorClause) where.push(cursorClause);
 
     params.push(limit + 1);
     const { rows } = await pool.query(

@@ -16,38 +16,39 @@ const router = express.Router();
 // ─── GET /api/v1/buyers ─────────────────────────────────────────────────────
 router.get('/', validateQuery(buyerListQuery), async (req, res, next) => {
   try {
-    const { limit, cursor, sort = 'created_at', order, email } = req.validQuery;
+    const { limit, cursor, sort = 'created_at', order, email, createdAt } = req.validQuery;
     const direction = order === 'asc' ? 'ASC' : 'DESC';
     const operator  = order === 'asc' ? '>'  : '<';
 
-    const params  = [];
-    const where   = ['deleted_at IS NULL'];
+    const params = [];
+    const filters = ['deleted_at IS NULL'];
 
     if (email) {
       params.push(email);
-      where.push(`email = $${params.length}`);
+      filters.push(`email = $${params.length}`);
+    }
+    if (createdAt) {
+      params.push(createdAt);
+      filters.push(`created_at >= $${params.length}`);
     }
 
+    let cursorClause = '';
     if (cursor) {
       const decoded = decodeCursor(cursor);
       if (!decoded) {
         return res.status(400).json(errorResponse('BAD_REQUEST', 'Malformed cursor'));
       }
       params.push(decoded.sortValue, decoded.id);
-      where.push(
-        `(${sort} ${operator} $${params.length - 1} OR (${sort} = $${params.length - 1} AND id ${operator} $${params.length}))`,
-      );
+      cursorClause = `(${sort} ${operator} $${params.length - 1} OR (${sort} = $${params.length - 1} AND id ${operator} $${params.length}))`;
     }
 
-    const whereClause = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const whereClause = `WHERE ${filters.join(' AND ')}${cursorClause ? ' AND ' + cursorClause : ''}`;
 
     // total count (ignores cursor — counts the full filtered set)
-    const countParams = params.slice(0, email ? 1 : 0);
-    const countWhere  = ['deleted_at IS NULL'];
-    if (email) countWhere.push(`email = $1`);
+    const filterParamCount = params.length - (cursor ? 2 : 0);
     const { rows: countRows } = await pool.query(
-      `SELECT COUNT(*) FROM buyers WHERE ${countWhere.join(' AND ')}`,
-      countParams,
+      `SELECT COUNT(*) FROM buyers WHERE ${filters.join(' AND ')}`,
+      params.slice(0, filterParamCount),
     );
     const total = parseInt(countRows[0].count, 10);
 
