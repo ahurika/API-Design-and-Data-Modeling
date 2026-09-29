@@ -31,8 +31,13 @@ function parseTimestamptz(value) {
 types.setTypeParser(TIMESTAMPTZ_OID, parseTimestamptz);
 types.setTypeParser(TIMESTAMP_OID, parseTimestamptz);
 
+let connectionString = process.env.DATABASE_URL;
+if (connectionString && connectionString.includes('sslmode=require')) {
+  connectionString = connectionString.replace('sslmode=require', 'sslmode=require&uselibpqcompat=true');
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString,
   // Only enable TLS when the provider mandates it (e.g. Neon URLs include
   // sslmode=require) or in production. Local plaintext-DB development without
   // an sslmode in DATABASE_URL keeps ssl disabled.

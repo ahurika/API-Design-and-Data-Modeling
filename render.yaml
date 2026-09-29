@@ -14,12 +14,12 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        value: '10000'
       - key: DATABASE_URL
         sync: false
       - key: RATE_LIMIT_WINDOW_SECONDS
-        value: 60
+        value: '60'
       - key: RATE_LIMIT_MAX_REQUESTS
-        value: 100
+        value: '100'
 # DATABASE_URL is provided at runtime from a managed PostgreSQL provider
 # (e.g. Neon). Production seed runs `npm run seed` against that connection.
