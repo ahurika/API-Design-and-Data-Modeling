@@ -1,0 +1,19 @@
+=== API Root Endpoint ===
+GET https://api-design-and-data-modeling.onrender.com/
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{"data":{"name":"Marketplace API","version":"v1","resources":["buyers","sellers","listings","orders","reviews"],"docs":"/README_API_DOCUMENTATION.md"}}
+
+=== API Buyers Endpoint (with rate limits) ===
+GET https://api-design-and-data-modeling.onrender.com/api/v1/buyers?limit=2
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+ratelimit-limit: 100
+ratelimit-policy: 100;w=60
+ratelimit-remaining: 99
+ratelimit-reset: 60
+
+{"data":[{"id":"02a245af-0040-4b90-8d12-01648ccc567a","name":"Buyer 143","email":"buyer143@example.com","createdAt":"2026-09-25T06:53:30.416000Z","updatedAt":"2026-09-25T06:53:30.416000Z"},{"id":"50794ea8-635d-4b13-9d09-efb6ee426665","name":"Buyer 148","email":"buyer148@example.com","createdAt":"2026-09-13T16:06:51.416000Z","updatedAt":"2026-09-13T16:06:51.416000Z"}],"meta":{"total":200,"limit":2,"hasMore":true,"nextCursor":"eyJpZCI6IjUwNzk0ZWE4LTYzNWQtNGIxMy05ZDA5LWVmYjZlZTQyNjY2NSIsInNvcnRWYWx1ZSI6IjIwMjYtMDktMTNUMTY6MDY6NTEuNDE2MDAwWiJ9"}}
